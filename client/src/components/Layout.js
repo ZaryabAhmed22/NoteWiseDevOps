@@ -23,7 +23,7 @@ function Layout({ children }) {
         </Link>
       </header>
 
-      <AnimatedBanner message="Welcome to NoteWise 🚀" />
+      {/* <AnimatedBanner message="Welcome to NoteWise 🚀" /> */}
 
       <div className="app-body">
         {user && (

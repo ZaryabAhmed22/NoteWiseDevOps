@@ -69,7 +69,7 @@ function UserDashboard() {
   return (
     <div className="container fade-in">
       <div className="header">
-        <h2>User Manager (React + Node + MySQL)</h2>
+        <h2>User Manager</h2>
         <div>
           <b>{user?.name}</b> ({user?.role}) &nbsp;
           <button onClick={logout}>Logout</button>
