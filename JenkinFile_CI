@@ -1,0 +1,70 @@
+pipeline {
+    agent any
+    
+    tools {
+        // tool name: 'nodejs22', type: 'nodejs'
+        nodejs 'nodejs22'
+    }
+    
+    environment {
+        SCANNER_HOME = tool 'sonar-scanner'
+    }
+    
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git branch: 'dev', url: 'https://github.com/ZaryabAhmed22/NoteWiseDevOps.git'
+            }
+        }
+        
+       stage('Frontend Compilation') {
+            steps {
+                dir('client') {
+                    // Syntax check JavaScript files
+                    sh 'find . -name "*.js" -exec node --check {} +'
+                }
+            }
+        }
+        
+        stage('Backend Compilation') {
+            steps {
+                dir('api') {
+                    // Corrected comment label, syntax check JavaScript files
+                    sh 'find . -name "*.js" -exec node --check {} +'
+                }
+            }
+        }
+        
+         stage('Gitleaks Scan') {
+            steps {
+                sh 'gitleaks detect --source ./client --exit-code 1'
+                sh 'gitleaks detect --source ./api --exit-code 1'
+            }
+        }
+        
+         stage('Hello') {
+            steps {
+                withSonarQubeEnv('sonar') {
+                    sh ''' 
+                    $SCANNER_HOME/bin/sonar-scanner -Dsonar.projectName=NodeJS-Project \
+                    -Dsonar.projectKey=Nodejs-Project
+                    '''
+    }
+            }
+        }
+        
+         stage('Quality Gate Check') {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-token' 
+                }
+            }
+        }
+        
+         stage('Trivy') {
+            steps {
+                sh 'trivy fs --format table -o fs-report.hml .'
+            }
+        }
+    }
+}
